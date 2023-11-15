@@ -1,0 +1,266 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "API para manejar furgonetas",
+      "version": "1.0.0",
+      "title": "API de furgonetas"
+    },
+    "host": "localhost:4007",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "vans",
+        "description": "caracteristicas de las furgonetas"
+      }, {
+        "name": "usuarios",
+        "description": "Operaciones de Usuarios"
+      }
+    ],
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/vans": {
+        "get": {
+          "tags": ["vans"],
+          "summary": "Obtener todas las furgonetas",
+          "description": "Retorna todas las furgonetas registradas",
+          "produces": ["application/json"],
+          "responses": {
+            "200": {
+              "description": "Operación exitosa",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/vans"
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": ["vans"],
+          "summary": "insertar una nueva furgoneta",
+          "description": "añade tu furgoneta",
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Objeto furgoneta que necesita ser añadido",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/vans"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "furgoneta creada"
+            }
+          }
+        }
+      },
+      "/vans/{id}": {
+        "get": {
+          "tags": ["vans"],
+          "summary": "Encuentra una furgoneta por ID",
+          "description": "Retorna una furgoneta única",
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "ID de la furgoneta a retornar",
+              "required": true,
+              "type": "integer",
+              "format": "int64"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Operación exitosa",
+              "schema": {
+                "$ref": "#/definitions/van"
+              }
+            },
+            "404": {
+              "description": "furgoneta no encontrada"
+            }
+          }
+        },
+        "put": {
+          "tags": ["vans"],
+          "summary": "Actualizar una furgoneta existente",
+          "description": "Actualiza una furgoneta",
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "integer",
+              "format": "int64"
+            },
+            {
+              "in": "body",
+              "name": "body",
+              "description": "furgoneta que necesita ser actualizada",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/van"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "furgoneta actualizada"
+            }
+          }
+        },
+        "delete": {
+          "tags": ["vans"],
+          "summary": "Eliminar una furgoneta",
+          "description": "Elimina una furgoneta por ID",
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "type": "integer",
+              "format": "int64"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "furgoneta eliminada"
+            }
+          }
+        }
+      },
+      "/register": {
+        "post": {
+          "tags": ["usuarios"],
+          "summary": "Registrar un nuevo usuario",
+          "description": "Crea un nuevo usuario en el sistema",
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Datos del usuario a registrar",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Usuario registrado exitosamente"
+            }
+          }
+        }
+      },
+      "/login": {
+        "post": {
+          "tags": ["usuarios"],
+          "summary": "Iniciar sesión",
+          "description": "Iniciar sesión en el sistema",
+          "consumes": ["application/json"],
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Datos de inicio de sesión del usuario",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Login"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Inicio de sesión exitoso"
+            },
+            "401": {
+              "description": "Credenciales inválidas"
+            }
+          }
+        }
+      },
+    
+    "/users": {
+        "get": {
+          "tags": ["usuarios"],
+          "summary": "Obtener todos los usuarios",
+          "description": "Retorna todos los usuarios registrados",          
+          "produces": ["application/json"],
+          "responses": {
+            "200": {
+              "description": "operacion existosa",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/users"
+                }
+              }
+            }           
+          }
+        }
+      }
+    },
+    "definitions": {
+      "van": {
+        "type": "object",
+        "required": ["nombre", "año_matriculacion", "color", "numero_plazas"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "ingredientes": {
+            "type": "string"
+          },
+          "instrucciones": {
+            "type": "string"
+          }
+        }
+      }
+    },"User": {
+        "type": "object",
+        "required": ["nombre", "email", "password"],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      }
+  }
+  

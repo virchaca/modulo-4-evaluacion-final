@@ -3,14 +3,21 @@ const cors = require("cors");
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
+//swagger
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./swagger.json");
+
 // create and config server
 const server = express();
 server.use(cors());
 server.use(express.json());
+server.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 //Install and set JWT y bcrypt
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+
+
 
 // init express aplication
 const serverPort = 4007;
