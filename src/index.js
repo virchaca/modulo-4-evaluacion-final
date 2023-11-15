@@ -280,4 +280,82 @@ server.post("/register", async (req, res) => {
   }
 });
 
+//LOGIN
 
+//login
+const generateToken = (payload) => {
+  const token = jwt.sign(payload, 'secreto', { expiresIn: '1h' });
+    return token;
+  };
+  
+  const verifyToken = (token) => {
+    try {
+      const decoded = jwt.verify(token, 'secreto');
+      return decoded;
+    } catch (err) {
+      return null;
+    }
+  };
+  
+server.post("/login", async (req, res) => {
+  //receive application info with user name and password.
+  const body = req.body;
+
+  //Buscar si el usuario existe en la bases de datos
+  const sql = "SELECT * FROM usuarios_db WHERE email = ?";
+  const connection = await getConnection();
+  const [users] = await connection.query(sql, [body.email]);
+  connection.end();
+
+  const user = users[0]; //first element from list received from SELECT query
+console.log(user);
+  //prove if user exists and password is correct using bcrypt.compare.
+  const passwordCorrect =
+    user === null
+      ? false
+      : await bcrypt.compare(body.password, user.password);
+
+  //if user does not exist or password incorrect, send a 401 state and error messsage
+  if (!(user && passwordCorrect)) {
+    return res.status(401).json({
+      success:false,
+      error: "Credenciales inválidas",
+    });
+  }
+
+  //If credentials ar OK, will get an userForToken object with  user's username and id.
+  const userForToken = {
+    username: user.username,
+    id: user.id,
+  };
+
+  //Generate token for front
+  const token = generateToken(userForToken);
+
+  //Finally if all is OK, the response is 200 state and send JSON object with token, users name and real name.
+  res
+    .status(200)
+    .json({ success: true, token, 
+      nombre: `usuario: ${user.nombre}`,
+      message: 'te has logueado correctamente'});
+});
+
+//GET ALL USERS - PRIVATE INFO FOR PROGRAMMERS
+server.get("/users", async (req, res) => {
+  let query = "SELECT * FROM usuarios_db";
+  const conn = await getConnection();
+  try {
+    const [results] = await conn.query(query);
+    const numOfElements = results.length;
+    conn.end();
+    res.json({
+      count: numOfElements,
+      results: results,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: `Ha ocurrido un error:${error}`,
+    });
+  }
+});

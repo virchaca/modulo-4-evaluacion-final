@@ -169,3 +169,26 @@ Para ello indicaremos, por ejemplo en la url del navegador, el id al que queremo
 Además en nuestra aplicacion hemos creado una base de datos con los usurarios, para registrar nuevos usuarios y que puedan logearse en su cuenta.
 
 Los datos requeridos que hay que proprocionar opara registrarse son nombre, email y contraseña, y mediante el email determinamos que un mismo usuario no se registre dos veces.
+
+```bash
+                        {
+                        "email": "usuario@email.com",
+                        "nombre": "nombre",
+                        "password": "contraseña"                        
+                        }
+```
+
+Para loguearse, el usuario deberá introducir su nombre y contraseña en formato json:
+
+```bash
+                       {
+                        "email": "usuario@email.com",                       
+                        "password": "contraseña"                        
+                        }
+                        
+```
+En caso de introducir algun dato mal o que el usuario no exista, recibirá una respuesta del tipo
+```bash
+                    "success": false,
+                    "error": "Credenciales inválidas"
+```
