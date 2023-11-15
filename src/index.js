@@ -19,8 +19,8 @@ async function getConnection() {
   const connection = await mysql.createConnection({
     host: "Localhost",
     user: "root",
-    password: "Mybootcamp@23",
-    // password: process.env.PASS, //no funciona, mirar por que
+    // password: "Mybootcamp@23",
+    password: process.env.PASS,
     database: "vans_db",
   });
   await connection.connect();
@@ -82,8 +82,7 @@ server.post("/vans", async (req, res) => {
       return;
     }
 
-    // Insertar la nueva furgoneta si no existe
-
+    // Insert the new van if it does not exist yet
     const [results] = await conn.query(query, [
       marca,
       año_matriculacion,
@@ -122,8 +121,9 @@ server.put("/vans/:id", async (req, res) => {
 
   let sql =
     "UPDATE vans_details SET marca = ? , año_matriculacion = ?, color =?, numero_plazas = ? WHERE id = ?;";
+
   if (isNaN(parseInt(año_matriculacion && numero_plazas))) {
-    //if the year written or seats are not a number tell me by message and do not insert the van
+    //if the year written or seats are not a number tell me by message and do not update the van
     res.json({
       success: false,
       error: "Año de matriculacion y numero de plazas deben ser un número",
@@ -139,6 +139,7 @@ server.put("/vans/:id", async (req, res) => {
       numero_plazas,
       idVan,
     ]);
+
     if (results.affectedRows === 0) {
       //the van chosen does not exist
       res.json({
