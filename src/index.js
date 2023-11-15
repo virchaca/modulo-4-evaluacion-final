@@ -21,11 +21,11 @@ server.listen(serverPort, () => {
 // conexion with mysql DB
 async function getConnection() {
   const connection = await mysql.createConnection({
-    host: "Localhost",
-    user: "root",
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
     // password: "Mybootcamp@23",
     password: process.env.PASS,
-    database: "vans_db",
+    database: process.env.DB_NAME,
   });
   await connection.connect();
   console.log(
