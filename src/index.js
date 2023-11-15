@@ -35,13 +35,20 @@ async function getConnection() {
 server.get("/vans", async (req, res) => {
   let query = "SELECT * FROM vans_details";
   const conn = await getConnection();
-  const [results] = await conn.query(query);
-  const numOfElements = results.length;
-  conn.end();
-  res.json({
-    count: numOfElements,
-    results: results,
-  });
+  try {
+    const [results] = await conn.query(query);
+    const numOfElements = results.length;
+    conn.end();
+    res.json({
+      count: numOfElements,
+      results: results,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: `Ha ocurrido un error:${error}`,
+    });
+  }
 });
 
 // INSERT A NEW VAN - POST
@@ -212,19 +219,26 @@ server.get("/vans/:id", async (req, res) => {
   }
 
   let query = "SELECT * FROM vans_details WHERE id = ?";
-  const conn = await getConnection();
-  const [results] = await conn.query(query, [idVan]);
-  const numOfElements = results.length;
-  conn.end();
-  if (numOfElements === 0) {
-    //if the ID does not exists give me a message
+  try {
+    const conn = await getConnection();
+    const [results] = await conn.query(query, [idVan]);
+    const numOfElements = results.length;
+    conn.end();
+    if (numOfElements === 0) {
+      //if the ID does not exists give me a message
+      res.json({
+        success: false,
+        message: "No existe la van que buscas",
+      });
+      return;
+    }
+    res.json({
+      results: results[0],
+    });
+  } catch (error) {
     res.json({
       success: false,
-      message: "No existe la van que buscas",
+      message: `Ha ocurrido un error:${error}`,
     });
-    return;
   }
-  res.json({
-    results: results[0],
-  });
 });
