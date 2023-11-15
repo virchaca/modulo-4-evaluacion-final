@@ -3,7 +3,6 @@ const cors = require("cors");
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
-
 // create and config server
 const server = express();
 server.use(cors());
@@ -32,38 +31,75 @@ async function getConnection() {
   return connection;
 }
 
-
-//LIST ALL VANS FROM MY DB - GET 
+//LIST ALL VANS FROM MY DB - GET
 server.get("/vans", async (req, res) => {
   let query = "SELECT * FROM vans_details";
   const conn = await getConnection();
   const [results] = await conn.query(query);
+  const numOfElements = results.length;
+  conn.end();
   res.json({
+    count: numOfElements,
     results: results,
   });
 });
 
-// INSERT A NEW VAN - POST 
+// INSERT A NEW VAN - POST
 server.post("/vans", async (req, res) => {
   const newVan = req.body;
   const { marca, año_matriculacion, color, numero_plazas } = newVan;
+  let selectQuery =
+    "SELECT * FROM vans_details WHERE marca = ? AND año_matriculacion = ?;";
   let query =
     "INSERT INTO vans_details(marca, año_matriculacion, color, numero_plazas) VALUES (?, ?, ?, ?);";
+
+  if (isNaN(parseInt(año_matriculacion && numero_plazas))) {
+    //if the year written or seats are not a number tell me by message and do not insert the van
+    res.json({
+      success: false,
+      error: "Año de matriculacion y numero de plazas deben ser un número",
+    });
+    return;
+  }
+
   try {
     const conn = await getConnection();
+
+    // Verify if the van already exists
+    const [existingVan] = await conn.query(selectQuery, [
+      marca,
+      año_matriculacion,
+      color,
+    ]);
+
+    if (existingVan.length > 0) {
+      // If the van exists, send me a message
+      res.json({
+        success: false,
+        message: `Esta furgoneta ya existe, su id es ${existingVan[0].id} `,
+        results: existingVan,
+      });
+      return;
+    }
+
+    // Insertar la nueva furgoneta si no existe
+
     const [results] = await conn.query(query, [
       marca,
       año_matriculacion,
       color,
       numero_plazas,
     ]);
+
     if (results.affectedRows === 0) {
+      //the insertion failed
       res.json({
         success: false,
-        message: "No se ha podido insertar",
+        message: "No se ha podido insertar tu van",
       });
       return;
     }
+    conn.end();
     res.json({
       success: true,
       id: results.insertId,
@@ -72,22 +108,30 @@ server.post("/vans", async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: `Ha ocurrido un error${error}`,
+      message: `Ha ocurrido un error:${error}`,
     });
   }
 });
 
-//UPDATE VANS INFO - PUT 
+//UPDATE VANS INFO - PUT
 //test my endpoint writing the idVan I want to update on the url -- http://localhost:4007/vans/16
-server.put("/vans/:id", async (req, res) => {  
+server.put("/vans/:id", async (req, res) => {
   const dataVan = req.body; //object, get req.body values
   const { marca, año_matriculacion, color, numero_plazas } = dataVan;
   const idVan = req.params.id; //get id through url params
 
-   let sql =
+  let sql =
     "UPDATE vans_details SET marca = ? , año_matriculacion = ?, color =?, numero_plazas = ? WHERE id = ?;";
-    try {
-     const conn = await getConnection();
+  if (isNaN(parseInt(año_matriculacion && numero_plazas))) {
+    //if the year written or seats are not a number tell me by message and do not insert the van
+    res.json({
+      success: false,
+      error: "Año de matriculacion y numero de plazas deben ser un número",
+    });
+    return;
+  }
+  try {
+    const conn = await getConnection();
     const [results] = await conn.query(sql, [
       marca,
       año_matriculacion,
@@ -95,11 +139,27 @@ server.put("/vans/:id", async (req, res) => {
       numero_plazas,
       idVan,
     ]);
+    if (results.affectedRows === 0) {
+      //the van chosen does not exist
+      res.json({
+        success: false,
+        message: `Lo siento pero no existe la van ${idVan}`,
+      });
+      return;
+    }
+    if (results.affectedRows === 0) {
+      //the updating failed
+      res.json({
+        success: false,
+        message: "No se ha podido actualizar tu van",
+      });
+      return;
+    }
+    conn.end();
     res.json({
       success: true,
-      message: "Van actualizada correctamente",
+      message: `Van ${idVan} actualizada correctamente`,
     });
-
   } catch (error) {
     res.json({
       success: false,
@@ -107,21 +167,28 @@ server.put("/vans/:id", async (req, res) => {
     });
   }
 });
-
 
 // REMOVE A VAN FROM THE LIST - DELETE
-server.delete("/vans/:id", async (req, res) => {  
+server.delete("/vans/:id", async (req, res) => {
   const idVan = req.params.id; //get id through url params
-  let sql =
-    " DELETE FROM vans_details WHERE id = ?;";
-    try {
-     const conn = await getConnection();
-    const [results] = await conn.query(sql, [idVan,]);
+  let sql = " DELETE FROM vans_details WHERE id = ?;";
+
+  try {
+    const conn = await getConnection();
+    const [results] = await conn.query(sql, [idVan]);
+    if (results.affectedRows === 0) {
+      //the van chosen does not exist
+      res.json({
+        success: false,
+        message: `Lo siento pero no existe la van ${idVan}`,
+      });
+      return;
+    }
+    conn.end();
     res.json({
       success: true,
-      message: "Van eliminada :(",
+      message: `La Van ${idVan} ha sido eliminada :(`,
     });
-
   } catch (error) {
     res.json({
       success: false,
@@ -130,9 +197,8 @@ server.delete("/vans/:id", async (req, res) => {
   }
 });
 
-
 //GET ONE VAN BY ID - (GET /vans/:id).
-server.get("/vans/:id", async (req, res) => {  
+server.get("/vans/:id", async (req, res) => {
   const idVan = req.params.id; //get id through url params
 
   if (isNaN(parseInt(idVan))) {
@@ -144,11 +210,11 @@ server.get("/vans/:id", async (req, res) => {
     return;
   }
 
-  let query = "SELECT * FROM vans_details WHERE id = ?"; 
+  let query = "SELECT * FROM vans_details WHERE id = ?";
   const conn = await getConnection();
-    const [results] = await conn.query(query, [idVan]);
-
+  const [results] = await conn.query(query, [idVan]);
   const numOfElements = results.length;
+  conn.end();
   if (numOfElements === 0) {
     //if the ID does not exists give me a message
     res.json({
@@ -158,8 +224,6 @@ server.get("/vans/:id", async (req, res) => {
     return;
   }
   res.json({
-    results: results[0], 
+    results: results[0],
   });
 });
-
-
