@@ -8,6 +8,10 @@ const server = express();
 server.use(cors());
 server.use(express.json());
 
+//Install and set JWT y bcrypt
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
 // init express aplication
 const serverPort = 4007;
 server.listen(serverPort, () => {
@@ -242,3 +246,38 @@ server.get("/vans/:id", async (req, res) => {
     });
   }
 });
+
+
+//REGISTER A NEW USER
+server.post("/register", async (req, res) => {
+  const email = req.body.email;
+  const username = req.body.nombre;
+  const password = req.body.password;
+
+  const passwordHashed = await bcrypt.hash(password, 10);
+  const sql =
+    "INSERT INTO usuarios_db (email, nombre, password) VALUES (?, ? ,?)";
+
+  try {
+    const conn = await getConnection();    
+    const [results] = await conn.query(sql, [email, username, passwordHashed]);
+    
+    // Generate JWT token
+    const token = jwt.sign({ userId: results.insertId, email }, 'secret', { expiresIn: '1h' });
+
+    conn.end();
+    res.json({
+      success: true,
+      id: results.insertId,
+      token: token,  // Enviar el token en la respuesta
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Error al registrar el usuario.",
+    });
+  }
+});
+
+

@@ -1,7 +1,7 @@
 # modulo-4-evaluacion-final-_Virginia Alvarez Perez_
     modulo-4-evaluacion-final-virchaca created by GitHub Classroom
 
-Hemos desarrollado una API consisitente en una listado de furgonetas, y algunos detalles de las mismas, para poder gestionar una web de quedadas de furgonetas. Cada furgoneta tendrá un ususario, pero en ocasiones un usuario puede llegar a tener varias furgonetas.
+Hemos desarrollado una API consisitente en una listado de furgonetas, y algunos detalles de las mismas, para poder gestionar una web de quedadas de furgonetas. 
 
 Hemos creado un servidor con EXPRESS, generado la base de datos en MySQL, y hecho la conexion entre ambos.
 
@@ -166,3 +166,6 @@ Para ello indicaremos, por ejemplo en la url del navegador, el id al que queremo
 
 
 
+Además en nuestra aplicacion hemos creado una base de datos con los usurarios, para registrar nuevos usuarios y que puedan logearse en su cuenta.
+
+Los datos requeridos que hay que proprocionar opara registrarse son nombre, email y contraseña, y mediante el email determinamos que un mismo usuario no se registre dos veces.

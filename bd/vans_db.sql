@@ -31,3 +31,11 @@ CHANGE COLUMN `numero_plazas` `numero_plazas` VARCHAR(45) NOT NULL ;
 
  
  DELETE FROM vans_details WHERE id = 17;
+ 
+ CREATE TABLE `vans_db`.`usuarios_db` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(100) NOT NULL,
+  `nombre` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(250) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE);
